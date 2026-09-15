@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Meetwell — When is everyone awake?</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕐</text></svg>">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI0VGRjRGQSIgcng9IjIwIi8+PGRlZnM+PGNsaXBQYXRoIGlkPSJsYyI+PGNpcmNsZSBjeD0iMzkiIGN5PSI1MCIgcj0iMjciLz48L2NsaXBQYXRoPjwvZGVmcz48Y2lyY2xlIGN4PSIzOSIgY3k9IjUwIiByPSIyNyIgZmlsbD0iIzZCN0FFMCIvPjxjaXJjbGUgY3g9IjYzIiBjeT0iNTAiIHI9IjIzIiBmaWxsPSIjNERDOUEwIi8+PGNpcmNsZSBjeD0iNjMiIGN5PSI1MCIgcj0iMjMiIGZpbGw9IiMxQjNENDgiIGNsaXAtcGF0aD0idXJsKCNsYykiLz48L3N2Zz4=">
 <meta name="description" content="Find the best time to talk to someone in a different timezone." />
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -479,15 +479,15 @@ function App() {
   const [dayOffset, setDayOffset] = useState(0);
   const [members, setMembers] = useState([{
     id: 1,
-    name: "Mom & Dad",
-    tz: "Asia/Kolkata"
+    name: "Emma",
+    tz: "Europe/London"
   }, {
     id: 2,
-    name: "Priya",
+    name: "Alex",
     tz: "America/Los_Angeles"
   }, {
     id: 3,
-    name: "Raj",
+    name: "Sam",
     tz: "Australia/Sydney"
   }]);
   const [nameInput, setNameInput] = useState("");
