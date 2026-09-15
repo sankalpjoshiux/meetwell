@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meetwell — When is everyone awake?</title>
+<meta name="description" content="Find the best time to talk to someone in a different timezone." />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="sj.experiments" data-color="#FFDD00" data-emoji=""  data-font="Lato" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+<script>
+const {
+  useState,
+  useMemo,
+  useEffect
+} = React;
+const IconBase = ({
+  size = 20,
+  color = "currentColor",
+  children
+}) => React.createElement("svg", {
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: color,
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round"
+}, children);
+const Plus = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("line", {
+    key: 1,
+    x1: 12,
+    y1: 5,
+    x2: 12,
+    y2: 19
+  }), React.createElement("line", {
+    key: 2,
+    x1: 5,
+    y1: 12,
+    x2: 19,
+    y2: 12
+  })]
+});
+const X = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("line", {
+    key: 1,
+    x1: 18,
+    y1: 6,
+    x2: 6,
+    y2: 18
+  }), React.createElement("line", {
+    key: 2,
+    x1: 6,
+    y1: 6,
+    x2: 18,
+    y2: 18
+  })]
+});
+const Users = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("path", {
+    key: 1,
+    d: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"
+  }), React.createElement("circle", {
+    key: 2,
+    cx: 9,
+    cy: 7,
+    r: 4
+  }), React.createElement("path", {
+    key: 3,
+    d: "M23 21v-2a4 4 0 0 0-3-3.87"
+  }), React.createElement("path", {
+    key: 4,
+    d: "M16 3.13a4 4 0 0 1 0 7.75"
+  })]
+});
+const Clock = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("circle", {
+    key: 1,
+    cx: 12,
+    cy: 12,
+    r: 10
+  }), React.createElement("polyline", {
+    key: 2,
+    points: "12 6 12 12 16 14"
+  })]
+});
+const ChevronLeft = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("polyline", {
+    key: 1,
+    points: "15 18 9 12 15 6"
+  })]
+});
+const ChevronRight = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("polyline", {
+    key: 1,
+    points: "9 18 15 12 9 6"
+  })]
+});
+const Sparkles = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("path", {
+    key: 1,
+    d: "M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"
+  }), React.createElement("path", {
+    key: 2,
+    d: "M5 17l0.8 2.2L8 20l-2.2 0.8L5 23l-0.8-2.2L2 20l2.2-0.8L5 17z"
+  })]
+});
+const Settings = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("circle", {
+    key: 1,
+    cx: 12,
+    cy: 12,
+    r: 3
+  }), React.createElement("path", {
+    key: 2,
+    d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.32.44.56.8.62.36.06.36.06.36.06H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+  })]
+});
+const Sun = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("circle", {
+    key: 1,
+    cx: 12,
+    cy: 12,
+    r: 5
+  }), React.createElement("line", {
+    key: 2,
+    x1: 12,
+    y1: 1,
+    x2: 12,
+    y2: 3
+  }), React.createElement("line", {
+    key: 3,
+    x1: 12,
+    y1: 21,
+    x2: 12,
+    y2: 23
+  }), React.createElement("line", {
+    key: 4,
+    x1: 4.22,
+    y1: 4.22,
+    x2: 5.64,
+    y2: 5.64
+  }), React.createElement("line", {
+    key: 5,
+    x1: 18.36,
+    y1: 18.36,
+    x2: 19.78,
+    y2: 19.78
+  }), React.createElement("line", {
+    key: 6,
+    x1: 1,
+    y1: 12,
+    x2: 3,
+    y2: 12
+  }), React.createElement("line", {
+    key: 7,
+    x1: 21,
+    y1: 12,
+    x2: 23,
+    y2: 12
+  }), React.createElement("line", {
+    key: 8,
+    x1: 4.22,
+    y1: 19.78,
+    x2: 5.64,
+    y2: 18.36
+  }), React.createElement("line", {
+    key: 9,
+    x1: 18.36,
+    y1: 5.64,
+    x2: 19.78,
+    y2: 4.22
+  })]
+});
+const Moon = ({
+  size,
+  color
+}) => IconBase({
+  size,
+  color,
+  children: [React.createElement("path", {
+    key: 1,
+    d: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+  })]
+});
+const CITIES = [{
+  label: "New York, USA",
+  tz: "America/New_York"
+}, {
+  label: "Los Angeles, USA",
+  tz: "America/Los_Angeles"
+}, {
+  label: "Chicago, USA",
+  tz: "America/Chicago"
+}, {
+  label: "Toronto, Canada",
+  tz: "America/Toronto"
+}, {
+  label: "Mexico City, Mexico",
+  tz: "America/Mexico_City"
+}, {
+  label: "Sao Paulo, Brazil",
+  tz: "America/Sao_Paulo"
+}, {
+  label: "London, UK",
+  tz: "Europe/London"
+}, {
+  label: "Paris, France",
+  tz: "Europe/Paris"
+}, {
+  label: "Berlin, Germany",
+  tz: "Europe/Berlin"
+}, {
+  label: "Lagos, Nigeria",
+  tz: "Africa/Lagos"
+}, {
+  label: "Johannesburg, South Africa",
+  tz: "Africa/Johannesburg"
+}, {
+  label: "Dubai, UAE",
+  tz: "Asia/Dubai"
+}, {
+  label: "Mumbai, India",
+  tz: "Asia/Kolkata"
+}, {
+  label: "Karachi, Pakistan",
+  tz: "Asia/Karachi"
+}, {
+  label: "Dhaka, Bangladesh",
+  tz: "Asia/Dhaka"
+}, {
+  label: "Bangkok, Thailand",
+  tz: "Asia/Bangkok"
+}, {
+  label: "Singapore",
+  tz: "Asia/Singapore"
+}, {
+  label: "Manila, Philippines",
+  tz: "Asia/Manila"
+}, {
+  label: "Hong Kong",
+  tz: "Asia/Hong_Kong"
+}, {
+  label: "Shanghai, China",
+  tz: "Asia/Shanghai"
+}, {
+  label: "Tokyo, Japan",
+  tz: "Asia/Tokyo"
+}, {
+  label: "Seoul, South Korea",
+  tz: "Asia/Seoul"
+}, {
+  label: "Sydney, Australia",
+  tz: "Australia/Sydney"
+}, {
+  label: "Auckland, New Zealand",
+  tz: "Pacific/Auckland"
+}];
+const DAY_MS = 86400000;
+
+// Subtler, desaturated time-of-day palette — used inside the strips regardless of theme.
+function periodOf(hour) {
+  if (hour >= 9 && hour < 18) return {
+    color: "#D9B47C",
+    ink: "#3E2E12",
+    label: "Day",
+    comfort: 2
+  };
+  if (hour >= 6 && hour < 9 || hour >= 18 && hour < 21) return {
+    color: "#C68B78",
+    ink: "#33170D",
+    label: "Dawn / dusk",
+    comfort: 1
+  };
+  return {
+    color: "#585B80",
+    ink: "#EDEBF5",
+    label: "Night",
+    comfort: -3
+  };
+}
+const THEME = {
+  light: {
+    pageBg: "radial-gradient(circle at 50% -10%, rgba(120,120,255,0.10), transparent 55%), #F5F5F7",
+    cardBg: "linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0.55))",
+    cardBorder: "1px solid rgba(0,0,0,0.06)",
+    cardShadow: "0 1px 0 rgba(255,255,255,0.7) inset, 0 8px 24px rgba(0,0,0,0.08)",
+    textPrimary: "#1D1D1F",
+    textRgb: "29,29,31",
+    inputBg: "rgba(255,255,255,0.6)",
+    inputBorder: "rgba(0,0,0,0.12)",
+    dropdownOptionText: "#1D1D1F",
+    buttonActiveBg: "#1D1D1F",
+    buttonActiveText: "#FFFFFF",
+    buttonDisabledBg: "rgba(0,0,0,0.06)",
+    buttonDisabledBorder: "rgba(0,0,0,0.08)",
+    iconClock: "#5B6EF5",
+    iconSparkle: "#A9791F",
+    accentTeal: "#0F9C82",
+    accentTealBg: "rgba(15,156,130,0.10)",
+    accentAmber: "#A9791F",
+    accentAmberBorder: "rgba(169,121,31,0.22)",
+    accentBlue: "#0A84FF",
+    accentBlueBorder: "rgba(10,132,255,0.28)",
+    accentTealBorder: "rgba(15,156,130,0.24)",
+    matchBorder: "rgba(15,156,130,0.55)",
+    nameColors: ["#5B6EF5", "#0F9C82", "#B23E7A", "#A9791F", "#7C5CFC"],
+    goodOutline: "#1D1D1F"
+  },
+  dark: {
+    pageBg: "radial-gradient(circle at 50% -10%, rgba(120,120,255,0.16), transparent 50%), #0A0A0D",
+    cardBg: "linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03))",
+    cardBorder: "1px solid rgba(255,255,255,0.09)",
+    cardShadow: "0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 30px rgba(0,0,0,0.4)",
+    textPrimary: "#F5F5F7",
+    textRgb: "245,245,247",
+    inputBg: "rgba(255,255,255,0.05)",
+    inputBorder: "rgba(255,255,255,0.12)",
+    dropdownOptionText: "#111111",
+    buttonActiveBg: "#FFFFFF",
+    buttonActiveText: "#0A0A0D",
+    buttonDisabledBg: "rgba(255,255,255,0.08)",
+    buttonDisabledBorder: "rgba(255,255,255,0.12)",
+    iconClock: "#A9B0FF",
+    iconSparkle: "#E0BC7C",
+    accentTeal: "#7CE0C6",
+    accentTealBg: "rgba(124,224,198,0.12)",
+    accentAmber: "#E0BC7C",
+    accentAmberBorder: "rgba(224,188,124,0.25)",
+    accentBlue: "#6FB8FF",
+    accentBlueBorder: "rgba(111,184,255,0.32)",
+    accentTealBorder: "rgba(124,224,198,0.25)",
+    matchBorder: "rgba(124,224,198,0.5)",
+    nameColors: ["#9AA7FF", "#7CE0C6", "#F3A6D6", "#FFD08A", "#B7A6FF"],
+    goodOutline: "#F5F5F7"
+  }
+};
+function getBrowserTz() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch (e) {
+    return "UTC";
+  }
+}
+function getPartsInTz(date, tz) {
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hour12: false
+  });
+  const parts = {};
+  fmt.formatToParts(date).forEach(p => parts[p.type] = p.value);
+  return {
+    year: parseInt(parts.year, 10),
+    month: parseInt(parts.month, 10) - 1,
+    day: parseInt(parts.day, 10),
+    hour: parseInt(parts.hour, 10) % 24
+  };
+}
+function getOffsetMinutes(date, tz) {
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    timeZoneName: "longOffset"
+  });
+  const parts = fmt.formatToParts(date);
+  const raw = parts.find(p => p.type === "timeZoneName")?.value || "GMT+00:00";
+  const match = raw.match(/GMT([+-])(\d{1,2})(?::?(\d{2}))?/);
+  if (!match) return 0;
+  const sign = match[1] === "-" ? -1 : 1;
+  const hh = parseInt(match[2], 10);
+  const mm = match[3] ? parseInt(match[3], 10) : 0;
+  return sign * (hh * 60 + mm);
+}
+function utcForWallTime(year, month, day, hour, tz) {
+  const guess = new Date(Date.UTC(year, month, day, hour, 0, 0));
+  const offsetMin = getOffsetMinutes(guess, tz);
+  return new Date(guess.getTime() - offsetMin * 60000);
+}
+function localHourAt(date, tz) {
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    hour: "numeric",
+    hour12: false
+  });
+  const h = parseInt(fmt.format(date), 10) % 24;
+  return {
+    hour: h
+  };
+}
+function formatClock(hour, is24h) {
+  const h = (hour % 24 + 24) % 24;
+  if (is24h) return `${h.toString().padStart(2, "0")}:00`;
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  const suffix = h < 12 ? "am" : "pm";
+  return `${h12}${suffix}`;
+}
+function formatDateLabel(year, month, day, offset) {
+  const d = new Date(Date.UTC(year, month, day));
+  const weekday = d.toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    weekday: "long"
+  });
+  const dateStr = d.toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    month: "short",
+    day: "numeric"
+  });
+  if (offset === 0) return `Today · ${dateStr}`;
+  if (offset === 1) return `Tomorrow · ${dateStr}`;
+  if (offset === -1) return `Yesterday · ${dateStr}`;
+  return `${weekday} · ${dateStr}`;
+}
+function App() {
+  const browserTz = useMemo(() => getBrowserTz(), []);
+  const [themeMode, setThemeMode] = useState("light");
+  const [is24h, setIs24h] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const t = THEME[themeMode];
+  const [benchmarkTz, setBenchmarkTz] = useState(browserTz);
+  const [dayOffset, setDayOffset] = useState(0);
+  const [members, setMembers] = useState([{
+    id: 1,
+    name: "Mom & Dad",
+    tz: "Asia/Kolkata"
+  }, {
+    id: 2,
+    name: "Priya",
+    tz: "America/Los_Angeles"
+  }, {
+    id: 3,
+    name: "Raj",
+    tz: "Australia/Sydney"
+  }]);
+  const [nameInput, setNameInput] = useState("");
+  const [cityQuery, setCityQuery] = useState(CITIES[0].label);
+  const [awakeStart, setAwakeStart] = useState(8);
+  const [awakeEnd, setAwakeEnd] = useState(21);
+  const [includeYou, setIncludeYou] = useState(true);
+  const [selStart, setSelStart] = useState(null);
+  const [selEnd, setSelEnd] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const inputStyle = {
+    borderRadius: "10px",
+    border: `1px solid ${t.inputBorder}`,
+    background: t.inputBg,
+    color: t.textPrimary,
+    fontSize: "14px",
+    fontFamily: "'Inter', sans-serif"
+  };
+  const glassCard = {
+    background: t.cardBg,
+    backdropFilter: "blur(28px) saturate(160%)",
+    WebkitBackdropFilter: "blur(28px) saturate(160%)",
+    border: t.cardBorder,
+    borderRadius: "20px",
+    boxShadow: t.cardShadow
+  };
+  const txt = alpha => `rgba(${t.textRgb},${alpha})`;
+  const selection = useMemo(() => {
+    if (selStart === null || selEnd === null) return null;
+    return {
+      start: Math.min(selStart, selEnd),
+      end: Math.max(selStart, selEnd)
+    };
+  }, [selStart, selEnd]);
+  function startDrag(colIdx) {
+    setSelStart(colIdx);
+    setSelEnd(colIdx);
+    setIsDragging(true);
+  }
+  function extendDrag(colIdx) {
+    if (isDragging) setSelEnd(colIdx);
+  }
+  function endDrag() {
+    setIsDragging(false);
+  }
+  function previewWindow(w) {
+    setSelStart(w.start);
+    setSelEnd(w.end);
+  }
+  const matchedCity = CITIES.find(c => c.label.toLowerCase() === cityQuery.trim().toLowerCase());
+  const effectiveMembers = useMemo(() => {
+    if (!includeYou) return members;
+    return [{
+      id: "you",
+      name: "You",
+      tz: browserTz
+    }, ...members];
+  }, [members, includeYou, browserTz]);
+  const benchmarkToday = useMemo(() => getPartsInTz(new Date(), benchmarkTz), [benchmarkTz]);
+  const shiftedDate = useMemo(() => {
+    const base = new Date(Date.UTC(benchmarkToday.year, benchmarkToday.month, benchmarkToday.day));
+    return new Date(base.getTime() + dayOffset * DAY_MS);
+  }, [benchmarkToday, dayOffset]);
+  const shiftedParts = useMemo(() => ({
+    year: shiftedDate.getUTCFullYear(),
+    month: shiftedDate.getUTCMonth(),
+    day: shiftedDate.getUTCDate()
+  }), [shiftedDate]);
+  const hours = useMemo(() => {
+    return Array.from({
+      length: 24
+    }, (_, h) => utcForWallTime(shiftedParts.year, shiftedParts.month, shiftedParts.day, h, benchmarkTz));
+  }, [shiftedParts, benchmarkTz]);
+  const grid = useMemo(() => {
+    return effectiveMembers.map(m => ({
+      ...m,
+      cells: hours.map(d => localHourAt(d, m.tz))
+    }));
+  }, [effectiveMembers, hours]);
+  const goodColumns = useMemo(() => {
+    return hours.map((_, colIdx) => {
+      if (grid.length === 0) return false;
+      return grid.every(m => {
+        const h = m.cells[colIdx].hour;
+        return h >= awakeStart && h < awakeEnd;
+      });
+    });
+  }, [grid, hours, awakeStart, awakeEnd]);
+  function groupWindows(flags) {
+    const windows = [];
+    let start = null;
+    flags.forEach((good, i) => {
+      if (good && start === null) start = i;
+      if ((!good || i === flags.length - 1) && start !== null) {
+        const end = good && i === flags.length - 1 ? i : i - 1;
+        windows.push({
+          start,
+          end
+        });
+        start = null;
+      }
+    });
+    return windows;
+  }
+  const bestWindows = useMemo(() => groupWindows(goodColumns), [goodColumns]);
+  const columnScores = useMemo(() => {
+    return hours.map((_, colIdx) => {
+      if (grid.length === 0) return {
+        score: -999,
+        allComfortable: false
+      };
+      let score = 0;
+      let allComfortable = true;
+      grid.forEach(m => {
+        const p = periodOf(m.cells[colIdx].hour);
+        score += p.comfort;
+        if (p.comfort < 0) allComfortable = false;
+      });
+      return {
+        score,
+        allComfortable
+      };
+    });
+  }, [grid, hours]);
+  const recommendedWindows = useMemo(() => {
+    if (grid.length === 0) return [];
+    const flags = columnScores.map(c => c.allComfortable);
+    const windows = groupWindows(flags).map(w => {
+      let total = 0;
+      for (let i = w.start; i <= w.end; i++) total += columnScores[i].score;
+      const avg = total / (w.end - w.start + 1);
+      return {
+        ...w,
+        avg
+      };
+    });
+    return windows.sort((a, b) => b.avg - a.avg).slice(0, 3);
+  }, [columnScores, grid]);
+  function addMember() {
+    if (!nameInput.trim() || !matchedCity) return;
+    setMembers(prev => [...prev, {
+      id: Date.now(),
+      name: nameInput.trim(),
+      tz: matchedCity.tz
+    }]);
+    setNameInput("");
+  }
+  function removeMember(id) {
+    setMembers(prev => prev.filter(m => m.id !== id));
+  }
+  const benchmarkLabel = benchmarkTz === browserTz ? "your" : (CITIES.find(c => c.tz === benchmarkTz)?.label.split(",")[0] || benchmarkTz) + "'s";
+  const fc = h => formatClock(h, is24h);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "w-full min-h-screen",
+    style: {
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      background: t.pageBg
+    }
+  }, /*#__PURE__*/React.createElement("link", {
+    href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+    rel: "stylesheet"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "max-w-3xl mx-auto px-6 py-12"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-start justify-between gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    style: {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: "32px",
+      fontWeight: 700,
+      color: t.textPrimary,
+      letterSpacing: "-0.03em"
+    }
+  }, "When is everyone awake?"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: txt(0.6),
+      fontSize: "15px",
+      marginTop: "6px"
+    }
+  }, "A strip of daylight for each person you love, and the golden hour when they overlap.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSettingsOpen(s => !s),
+    "aria-label": "Settings",
+    style: {
+      ...inputStyle,
+      padding: "10px",
+      borderRadius: "999px",
+      display: "flex"
+    }
+  }, /*#__PURE__*/React.createElement(Settings, {
+    size: 18
+  })), settingsOpen && /*#__PURE__*/React.createElement("div", {
+    className: "p-4",
+    style: {
+      ...glassCard,
+      position: "absolute",
+      right: 0,
+      top: "48px",
+      width: "240px",
+      zIndex: 10,
+      boxShadow: t.cardShadow + ", 0 12px 32px rgba(0,0,0,0.25)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "12px",
+      fontWeight: 600,
+      color: txt(0.5),
+      marginBottom: "8px",
+      textTransform: "uppercase",
+      letterSpacing: "0.04em"
+    }
+  }, "Appearance"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 mb-4"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setThemeMode("light"),
+    className: "flex items-center justify-center gap-1 flex-1 py-2",
+    style: {
+      borderRadius: "10px",
+      fontSize: "13px",
+      fontWeight: 600,
+      background: themeMode === "light" ? t.buttonActiveBg : "transparent",
+      color: themeMode === "light" ? t.buttonActiveText : t.textPrimary,
+      border: `1px solid ${t.inputBorder}`
+    }
+  }, /*#__PURE__*/React.createElement(Sun, {
+    size: 14
+  }), " Light"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setThemeMode("dark"),
+    className: "flex items-center justify-center gap-1 flex-1 py-2",
+    style: {
+      borderRadius: "10px",
+      fontSize: "13px",
+      fontWeight: 600,
+      background: themeMode === "dark" ? t.buttonActiveBg : "transparent",
+      color: themeMode === "dark" ? t.buttonActiveText : t.textPrimary,
+      border: `1px solid ${t.inputBorder}`
+    }
+  }, /*#__PURE__*/React.createElement(Moon, {
+    size: 14
+  }), " Dark")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "12px",
+      fontWeight: 600,
+      color: txt(0.5),
+      marginBottom: "8px",
+      textTransform: "uppercase",
+      letterSpacing: "0.04em"
+    }
+  }, "Clock format"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setIs24h(false),
+    className: "flex-1 py-2",
+    style: {
+      borderRadius: "10px",
+      fontSize: "13px",
+      fontWeight: 600,
+      background: !is24h ? t.buttonActiveBg : "transparent",
+      color: !is24h ? t.buttonActiveText : t.textPrimary,
+      border: `1px solid ${t.inputBorder}`
+    }
+  }, "12-hour"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setIs24h(true),
+    className: "flex-1 py-2",
+    style: {
+      borderRadius: "10px",
+      fontSize: "13px",
+      fontWeight: 600,
+      background: is24h ? t.buttonActiveBg : "transparent",
+      color: is24h ? t.buttonActiveText : t.textPrimary,
+      border: `1px solid ${t.inputBorder}`
+    }
+  }, "24-hour"))))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 mt-6 p-4 flex-wrap",
+    style: glassCard
+  }, /*#__PURE__*/React.createElement(Clock, {
+    size: 16,
+    color: t.iconClock
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "13px",
+      color: txt(0.7)
+    }
+  }, "Line up everyone's day against"), /*#__PURE__*/React.createElement("select", {
+    value: benchmarkTz,
+    onChange: e => setBenchmarkTz(e.target.value),
+    style: {
+      ...inputStyle,
+      padding: "6px 10px"
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: browserTz,
+    style: {
+      color: t.dropdownOptionText
+    }
+  }, "Your local time (", browserTz, ")"), CITIES.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c.tz,
+    value: c.tz,
+    style: {
+      color: t.dropdownOptionText
+    }
+  }, c.label))), /*#__PURE__*/React.createElement("label", {
+    className: "flex items-center gap-2 ml-auto",
+    style: {
+      fontSize: "13px",
+      color: txt(0.7)
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: includeYou,
+    onChange: e => setIncludeYou(e.target.checked)
+  }), "Show me in the list")), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mt-4 p-4",
+    style: glassCard
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setDayOffset(d => d - 1),
+    "aria-label": "Previous day",
+    style: {
+      ...inputStyle,
+      padding: "8px",
+      display: "flex",
+      borderRadius: "999px"
+    }
+  }, /*#__PURE__*/React.createElement(ChevronLeft, {
+    size: 16
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: "15px",
+      fontWeight: 600,
+      color: t.textPrimary,
+      letterSpacing: "-0.01em"
+    }
+  }, formatDateLabel(shiftedParts.year, shiftedParts.month, shiftedParts.day, dayOffset)), dayOffset !== 0 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setDayOffset(0),
+    style: {
+      fontSize: "12px",
+      color: t.accentTeal,
+      textDecoration: "underline"
+    }
+  }, "Jump to today")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setDayOffset(d => d + 1),
+    "aria-label": "Next day",
+    style: {
+      ...inputStyle,
+      padding: "8px",
+      display: "flex",
+      borderRadius: "999px"
+    }
+  }, /*#__PURE__*/React.createElement(ChevronRight, {
+    size: 16
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap items-center gap-3 mt-4 p-4",
+    style: glassCard
+  }, /*#__PURE__*/React.createElement("input", {
+    value: nameInput,
+    onChange: e => setNameInput(e.target.value),
+    onKeyDown: e => e.key === "Enter" && addMember(),
+    placeholder: "Name (e.g. Grandma)",
+    className: "px-3 py-2",
+    style: {
+      ...inputStyle,
+      flex: "1 1 160px"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: "1 1 220px",
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    list: "city-options",
+    value: cityQuery,
+    onChange: e => setCityQuery(e.target.value),
+    placeholder: "Search or pick a city",
+    className: "px-3 py-2 w-full",
+    style: {
+      ...inputStyle,
+      borderColor: matchedCity ? t.matchBorder : t.inputBorder
+    }
+  }), /*#__PURE__*/React.createElement("datalist", {
+    id: "city-options"
+  }, CITIES.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c.tz,
+    value: c.label
+  })))), /*#__PURE__*/React.createElement("button", {
+    onClick: addMember,
+    disabled: !matchedCity || !nameInput.trim(),
+    className: "flex items-center gap-1 px-4 py-2",
+    style: {
+      borderRadius: "999px",
+      background: matchedCity && nameInput.trim() ? t.buttonActiveBg : t.buttonDisabledBg,
+      color: matchedCity && nameInput.trim() ? t.buttonActiveText : txt(0.35),
+      fontSize: "14px",
+      fontWeight: 600,
+      border: `1px solid ${t.buttonDisabledBorder}`
+    }
+  }, /*#__PURE__*/React.createElement(Plus, {
+    size: 16
+  }), " Add"), !matchedCity && cityQuery && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "12px",
+      color: "#C6704F",
+      width: "100%"
+    }
+  }, "Type a bit more or pick from the list — no exact match yet.")), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-4 mt-4 flex-wrap p-4",
+    style: glassCard
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "13px",
+      color: txt(0.7)
+    }
+  }, "Count someone as free between"), /*#__PURE__*/React.createElement("select", {
+    value: awakeStart,
+    onChange: e => setAwakeStart(Number(e.target.value)),
+    style: {
+      ...inputStyle,
+      padding: "4px 6px"
+    }
+  }, Array.from({
+    length: 24
+  }, (_, h) => /*#__PURE__*/React.createElement("option", {
+    key: h,
+    value: h,
+    style: {
+      color: t.dropdownOptionText
+    }
+  }, fc(h)))), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "13px",
+      color: txt(0.7)
+    }
+  }, "and"), /*#__PURE__*/React.createElement("select", {
+    value: awakeEnd,
+    onChange: e => setAwakeEnd(Number(e.target.value)),
+    style: {
+      ...inputStyle,
+      padding: "4px 6px"
+    }
+  }, Array.from({
+    length: 24
+  }, (_, h) => /*#__PURE__*/React.createElement("option", {
+    key: h,
+    value: h,
+    style: {
+      color: t.dropdownOptionText
+    }
+  }, fc(h)))), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "13px",
+      color: txt(0.7)
+    }
+  }, "their own local time")), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-5 mt-4 px-1 flex-wrap"
+  }, [periodOf(11), periodOf(7), periodOf(1)].map((p, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: "14px",
+      height: "14px",
+      borderRadius: "4px",
+      background: p.color,
+      display: "inline-block"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "12px",
+      color: txt(0.7)
+    }
+  }, p.label))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: "14px",
+      height: "14px",
+      borderRadius: "4px",
+      border: `2px solid ${t.goodOutline}`,
+      background: txt(0.05),
+      display: "inline-block"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "12px",
+      color: txt(0.7)
+    }
+  }, "Everyone free")), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: "14px",
+      height: "14px",
+      borderRadius: "4px",
+      border: `2px dashed ${t.accentBlue}`,
+      display: "inline-block"
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "12px",
+      color: txt(0.7)
+    }
+  }, "Your selection"))), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: "12px",
+      color: txt(0.45),
+      marginTop: "10px"
+    }
+  }, "Click and drag across any strip below to pick a window and see it land in everyone's own time."), effectiveMembers.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col items-center justify-center gap-2 mt-6 py-16",
+    style: {
+      ...glassCard,
+      color: txt(0.5)
+    }
+  }, /*#__PURE__*/React.createElement(Users, {
+    size: 28
+  }), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: "14px"
+    }
+  }, "Add family members to see the overlap.")) : /*#__PURE__*/React.createElement("div", {
+    className: "mt-6 p-5 overflow-x-auto",
+    style: glassCard
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: "680px",
+      userSelect: isDragging ? "none" : "auto"
+    },
+    onMouseUp: endDrag,
+    onMouseLeave: endDrag
+  }, grid.map((m, rowIdx) => /*#__PURE__*/React.createElement("div", {
+    key: m.id,
+    className: "flex items-center mb-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between pr-3",
+    style: {
+      width: "140px",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "14px",
+      fontWeight: 600,
+      color: m.id === "you" ? t.textPrimary : t.nameColors[rowIdx % t.nameColors.length]
+    }
+  }, m.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: "11px",
+      color: txt(0.45)
+    }
+  }, CITIES.find(c => c.tz === m.tz)?.label.split(",")[0] || m.tz)), m.id !== "you" && /*#__PURE__*/React.createElement("button", {
+    onClick: () => removeMember(m.id),
+    "aria-label": `Remove ${m.name}`,
+    style: {
+      color: txt(0.4)
+    }
+  }, /*#__PURE__*/React.createElement(X, {
+    size: 14
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-1",
+    style: {
+      gap: "2px"
+    }
+  }, m.cells.map((cell, colIdx) => {
+    const p = periodOf(cell.hour);
+    const isGood = goodColumns[colIdx];
+    const isSelected = selection && colIdx >= selection.start && colIdx <= selection.end;
+    return /*#__PURE__*/React.createElement("div", {
+      key: colIdx,
+      title: fc(cell.hour),
+      onMouseDown: () => startDrag(colIdx),
+      onMouseEnter: () => extendDrag(colIdx),
+      style: {
+        flex: 1,
+        height: "40px",
+        background: p.color,
+        borderRadius: "6px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        outline: isSelected ? `2px dashed ${t.accentBlue}` : isGood ? `2px solid ${t.goodOutline}` : "none",
+        outlineOffset: isSelected || isGood ? "-2px" : "0",
+        boxShadow: isSelected ? `0 0 10px ${t.accentBlue}66` : "none"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: "'Inter', sans-serif",
+        fontSize: "9px",
+        fontWeight: 600,
+        color: p.ink,
+        opacity: cell.hour % 3 === 0 ? 1 : 0
+      }
+    }, fc(cell.hour)));
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "flex"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "140px",
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-1",
+    style: {
+      gap: "2px"
+    }
+  }, hours.map((_, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: "10px",
+      color: txt(0.4),
+      marginTop: "4px"
+    }
+  }, i % 3 === 0 ? fc(i) : "")))), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: "11px",
+      color: txt(0.4),
+      marginTop: "8px"
+    }
+  }, "Hours shown are ", benchmarkLabel, " time on ", formatDateLabel(shiftedParts.year, shiftedParts.month, shiftedParts.day, dayOffset).split(" · ")[1], ". Each strip shows that person's own clock at the same moment."))), selection && /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 p-4",
+    style: {
+      ...glassCard,
+      border: `1px solid ${t.accentBlueBorder}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between flex-wrap gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "14px",
+      fontWeight: 600,
+      color: t.accentBlue
+    }
+  }, fc(selection.start), " – ", fc(selection.end + 1), " ", benchmarkLabel, " time"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setSelStart(null);
+      setSelEnd(null);
+    },
+    style: {
+      fontSize: "12px",
+      color: txt(0.5),
+      textDecoration: "underline"
+    }
+  }, "Clear selection")), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-2 mt-3"
+  }, grid.map((m, rowIdx) => {
+    const startHour = m.cells[selection.start].hour;
+    const endHour = m.cells[selection.end].hour;
+    const midHour = m.cells[Math.round((selection.start + selection.end) / 2)].hour;
+    const p = periodOf(midHour);
+    return /*#__PURE__*/React.createElement("div", {
+      key: m.id,
+      className: "flex items-center gap-3"
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: "10px",
+        height: "10px",
+        borderRadius: "3px",
+        background: p.color,
+        flexShrink: 0
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: "13px",
+        width: "110px",
+        color: m.id === "you" ? t.textPrimary : t.nameColors[rowIdx % t.nameColors.length],
+        fontWeight: 600
+      }
+    }, m.name), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: "13px",
+        color: txt(0.8)
+      }
+    }, fc(startHour), " – ", fc(endHour + 1)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: "12px",
+        color: txt(0.45)
+      }
+    }, p.label));
+  }))), effectiveMembers.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "mt-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement(Sparkles, {
+    size: 16,
+    color: t.iconSparkle
+  }), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: "17px",
+      fontWeight: 600,
+      color: t.textPrimary,
+      letterSpacing: "-0.01em"
+    }
+  }, "Recommended windows")), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: "13px",
+      color: txt(0.55),
+      marginTop: "2px"
+    }
+  }, "Ranked automatically by daylight comfort — daytime for the most people, nobody woken at 3am."), recommendedWindows.length === 0 ? /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: "14px",
+      color: txt(0.6),
+      marginTop: "8px"
+    }
+  }, "No hour keeps everyone out of the middle of their night on this day.") : /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-3 mt-3"
+  }, recommendedWindows.map((w, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "p-4",
+    style: {
+      ...glassCard,
+      border: `1px solid ${t.accentTealBorder}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between flex-wrap gap-2",
+    style: {
+      marginBottom: "6px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "11px",
+      fontWeight: 600,
+      color: t.accentTeal,
+      background: t.accentTealBg,
+      padding: "2px 8px",
+      borderRadius: "999px"
+    }
+  }, "#", i + 1, " pick"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "14px",
+      fontWeight: 600,
+      color: t.textPrimary
+    }
+  }, fc(w.start), " – ", fc(w.end + 1), " ", benchmarkLabel, " time")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => previewWindow(w),
+    style: {
+      fontSize: "12px",
+      color: t.accentBlue,
+      textDecoration: "underline"
+    }
+  }, "View on grid")), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap gap-x-4 gap-y-1"
+  }, grid.map(m => /*#__PURE__*/React.createElement("span", {
+    key: m.id,
+    style: {
+      fontSize: "13px",
+      color: txt(0.65)
+    }
+  }, /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: t.textPrimary
+    }
+  }, m.name, ":"), " ", fc(m.cells[w.start].hour), "–", fc(m.cells[w.end].hour + 1))))))), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontFamily: "'Inter', sans-serif",
+      fontSize: "17px",
+      fontWeight: 600,
+      color: t.textPrimary,
+      letterSpacing: "-0.01em",
+      marginTop: "24px"
+    }
+  }, "Windows inside your free-time range"), bestWindows.length === 0 ? /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: "14px",
+      color: txt(0.6),
+      marginTop: "8px"
+    }
+  }, "No hour works for everyone right now. Try widening the free-time range above.") : /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-3 mt-3"
+  }, bestWindows.map((w, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "p-4",
+    style: {
+      ...glassCard,
+      border: `1px solid ${t.accentAmberBorder}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between flex-wrap gap-2",
+    style: {
+      marginBottom: "6px"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "14px",
+      fontWeight: 600,
+      color: t.accentAmber
+    }
+  }, fc(w.start), " – ", fc(w.end + 1), " ", benchmarkLabel, " time"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => previewWindow(w),
+    style: {
+      fontSize: "12px",
+      color: t.accentBlue,
+      textDecoration: "underline"
+    }
+  }, "View on grid")), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap gap-x-4 gap-y-1"
+  }, grid.map(m => /*#__PURE__*/React.createElement("span", {
+    key: m.id,
+    style: {
+      fontSize: "13px",
+      color: txt(0.65)
+    }
+  }, /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: t.textPrimary
+    }
+  }, m.name, ":"), " ", fc(m.cells[w.start].hour), "–", fc(m.cells[w.end].hour + 1)))))))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-center gap-1 mt-12 pb-4"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "13px",
+      color: txt(0.45)
+    }
+  }, "Made with ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: "13px"
+    }
+  }, "❤️"), " by", " ", /*#__PURE__*/React.createElement("a", {
+    href: "https://sankalpjoshi.design",
+    target: "_blank",
+    rel: "noopener noreferrer",
+    style: {
+      color: t.accentBlue,
+      textDecoration: "underline"
+    }
+  }, "Sankalp Joshi")))));
+}
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
